@@ -6108,6 +6108,7 @@ var XLMLPatternTypeMap = {
 function parse_borders(t, styles, themes, opts) {
 	styles.Borders = [];
 	var border = {}, sub_border = {};
+	var position = "";
 	t[0].match(tagregex).forEach(function(x) {
 		var y = parsexmltag(x);
 		switch (y[0]) {
@@ -6120,22 +6121,42 @@ function parse_borders(t, styles, themes, opts) {
 				if (y.diagonalDown) { border.diagonalDown = y.diagonalDown; }
 				styles.Borders.push(border);
 				break;
-			case '</border>': break;
+			case '</border>': border = null;break;
 
 			/* note: not in spec, appears to be CT_BorderPr */
-			case '<left': case '<left/>': break;
+			case '<left': case '<left/>': 
+				if(y.style != null){
+					border.left = {style:y.style};
+					position = "left";
+				}
+				break;
 			case '</left>': break;
 
 			/* note: not in spec, appears to be CT_BorderPr */
-			case '<right': case '<right/>': break;
+			case '<right': case '<right/>': 
+				if(y.style != null){
+					border.right = {style:y.style};
+					position = "right";
+				}
+				break;
 			case '</right>': break;
 
 			/* 18.8.43 top CT_BorderPr */
-			case '<top': case '<top/>': break;
+			case '<top': case '<top/>': 
+				if(y.style != null){
+					border.top = {style:y.style};
+					position = "top";
+				}
+				break;
 			case '</top>': break;
 
 			/* 18.8.6 bottom CT_BorderPr */
-			case '<bottom': case '<bottom/>': break;
+			case '<bottom': case '<bottom/>': 
+				if(y.style != null){
+					border.bottom = {style:y.style};
+					position = "bottom";
+				}
+				break;
 			case '</bottom>': break;
 
 			/* 18.8.13 diagonal CT_BorderPr */
@@ -6159,7 +6180,9 @@ function parse_borders(t, styles, themes, opts) {
 			case '</end>': break;
 
 			/* 18.8.? color CT_Color */
-			case '<color': case '<color/>': break;
+			case '<color': case '<color/>': 
+				border[position].color = parseInt(y.indexed, 10);
+			break;
 			case '</color>': break;
 
 			default: if(opts && opts.WTF) throw new Error('unrecognized ' + y[0] + ' in borders');
